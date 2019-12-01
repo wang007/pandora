@@ -2,6 +2,7 @@ package com.github.wang007.listenable;
 
 /**
  * 该对象不存在中间状态。要么是成功，要么是失败
+ * immutable object
  *
  * created by wang007 on 2019/11/29
  */
