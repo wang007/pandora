@@ -1,5 +1,10 @@
 package com.github.wang007.listenable.future;
 
+import com.github.wang007.asyncResult.Future;
+import com.github.wang007.asyncResult.Promise;
+
+import java.util.concurrent.CompletionStage;
+
 /**
  * copy from netty
  *
@@ -7,27 +12,29 @@ package com.github.wang007.listenable.future;
  *
  * created by wang007 on 2019/11/30
  */
-public interface ListenablePromise<V> extends ListenableFuture<V> {
+public interface ListenablePromise<V> extends ListenableFuture<V>, Promise<V> {
 
-    /**
-     * Marks this future as a success and notifies all
-     * listeners.
-     *
-     * @return {@code true} if and only if successfully marked this future as
-     *         a success. Otherwise {@code false} because this future is
-     *         already marked as either a success or a failure.
-     */
-    boolean trySuccess(V result);
+    @Override
+    default ListenablePromise<V> setSuccess(V result) {
+        Promise.super.setSuccess(result);
+        return this;
+    }
 
-    /**
-     * Marks this future as a failure and notifies all
-     * listeners.
-     *
-     * @return {@code true} if and only if successfully marked this future as
-     *         a failure. Otherwise {@code false} because this future is
-     *         already marked as either a success or a failure.
-     */
-    boolean tryFailure(Throwable cause);
+    @Override
+    default ListenablePromise<V> setFailure(Throwable cause) {
+        Promise.super.setFailure(cause);
+        return this;
+    }
 
+    @Override
+    default Future<V> toFuture() {
 
+        return null;
+    }
+
+    @Override
+    default CompletionStage<V> toCompletionStage() {
+
+        return null;
+    }
 }

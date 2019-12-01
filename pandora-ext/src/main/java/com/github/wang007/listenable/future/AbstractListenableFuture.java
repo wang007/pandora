@@ -1,25 +1,29 @@
 package com.github.wang007.listenable.future;
 
-import com.github.wang007.listenable.AsyncResult;
+import com.github.wang007.asyncResult.AsyncResult;
+import com.github.wang007.asyncResult.CompletionStageResult;
+import com.github.wang007.asyncResult.Future;
+import com.github.wang007.asyncResult.Handler;
 import com.github.wang007.listenable.executor.ListenableExecutor;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
 
 /**
- *
+ * the skeleton of ListenableFuture
  *
  * created by wang007 on 2019/11/30
  */
 public abstract class AbstractListenableFuture<V> implements ListenableFuture<V> {
 
     /**
-     * 监听器
-     * 绝大多数情况下，监听器只有一个，所以这里就不用list来保存，当有多个的时候
+     * 异步回调处理器
+     * 绝大多数情况下，handler只有一个，所以这里就不用list来保存，当有多个的时候
      */
-    private Object listeners;
+    private Object handlers;
 
     private final ListenableExecutor carrierExecutor;
 
@@ -53,51 +57,51 @@ public abstract class AbstractListenableFuture<V> implements ListenableFuture<V>
     }
 
     @Override
-    public ListenableFuture<V> addListener(FutureListener<V> listener) {
+    public ListenableFuture<V> addHandler(Handler<AsyncResult<V>> handler) {
         if (isDone()) {
-            //回到carrierExecutor执行listener
+            //回到carrierExecutor执行handler
             if(carrierExecutor().inCurrentExecutor()) {
-                listener.onCompleted(getAsAsyncResult());
+                handler.handle(getAsAsyncResult());
             } else {
-                carrierExecutor().execute(() -> listener.onCompleted(getAsAsyncResult()));
+                carrierExecutor().execute(() -> handler.handle(getAsAsyncResult()));
             }
             return this;
         }
 
         synchronized (this) {
-            if (listeners == null) listeners = listener;
-            else if (listeners instanceof List) {
-                List<FutureListener<?>> lfs = (List<FutureListener<?>>) listeners;
-                lfs.add(listener);
+            if (handlers == null) handlers = handler;
+            else if (handlers instanceof List) {
+                List<Handler<?>> lfs = (List<Handler<?>>) handlers;
+                lfs.add(handler);
             } else {
-                List<FutureListener<?>> lfs = new ArrayList<>();
-                lfs.add((FutureListener<?>) listeners);
-                lfs.add(listener);
-                this.listeners = lfs;
+                List<Handler<?>> lfs = new ArrayList<>();
+                lfs.add(handler);
+                lfs.add(handler);
+                this.handlers = lfs;
             }
         }
         return this;
     }
 
     @Override
-    public List<FutureListener<V>> listeners() {
-        Object listeners = this.listeners;
-        if (listeners == null) return Collections.emptyList();
-        else if (listeners instanceof List) {
-            List<FutureListener<V>> lfs = (List<FutureListener<V>>) listeners;
+    public List<Handler<AsyncResult<V>>> handlers() {
+        Object handlers = this.handlers;
+        if (handlers == null) return Collections.emptyList();
+        else if (handlers instanceof List) {
+            List<Handler<AsyncResult<V>>> lfs = (List<Handler<AsyncResult<V>>>) handlers;
             return Collections.unmodifiableList(lfs);
         }
-        return Collections.singletonList((FutureListener<V>) listeners);
+        return Collections.singletonList((Handler<AsyncResult<V>>) handlers);
     }
 
     /**
-     * 执行通知listeners
+     * 执行通知handler
      */
-    protected void notifyListeners() {
+    protected void notifyHandlers() {
         synchronized (this) {
-            listeners().forEach(ls -> {
+            handlers().forEach(ls -> {
                 try {
-                    ls.onCompleted(getAsAsyncResult());
+                    ls.handle(getAsAsyncResult());
                 } catch (Throwable e) {
                     _logger.warn("execute onCompleted failed.", e);
                 }
@@ -106,9 +110,32 @@ public abstract class AbstractListenableFuture<V> implements ListenableFuture<V>
     }
 
     protected void ifWarningForGet() {
-        if (!isDone() && !ListenableRunFuture.Disable_Warning_Get_OnBlocking) {
+        if (!isDone() && !ListenableRunFuture._Disable_Warning_Get_OnBlocking) {
             _logger.warn("don't call #get or #get(timeout) directly, and instance of addListener or thenApply or...");
         }
     }
 
+    @Override
+    public boolean isCompleted() {
+        //TODO
+        return false;
+    }
+
+    @Override
+    public Future<V> toFuture() {
+        //TODO
+        return null;
+    }
+
+    @Override
+    public CompletionStage<V> toCompletionStage() {
+        //TODO
+        return null;
+    }
+
+    @Override
+    public CompletionStageResult<V> toCompletionStageResult() {
+        //TODO
+        return null;
+    }
 }

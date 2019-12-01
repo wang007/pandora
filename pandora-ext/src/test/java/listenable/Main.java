@@ -2,6 +2,8 @@ package listenable;
 
 import com.github.wang007.listenable.executor.ListenableExecutor;
 import com.github.wang007.listenable.executor.ListenableExecutorService;
+import com.github.wang007.listenable.future.ListenableFuture;
+import com.github.wang007.listenable.future.SimpleListenableFuture;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -14,6 +16,8 @@ public class Main {
 
     public static void main(String[] args) {
 
+
+
         Executor executor0 = new Executor() {
 
             private AtomicInteger num = new AtomicInteger();
@@ -23,6 +27,8 @@ public class Main {
                 new Thread(command, "thread0-num-" + num.getAndIncrement()).start();
             }
         };
+
+
 
         Executor executor1 = new Executor() {
 
@@ -35,6 +41,7 @@ public class Main {
         };
 
         ListenableExecutor executor = ListenableExecutor.create(executor0);
+
 
         executor.submit(() -> {
             try {
@@ -53,7 +60,6 @@ public class Main {
             return "result2";
 
         }, executor1).flatMap(str -> {
-
             System.out.println("thread name -> " + Thread.currentThread().getName());
             System.out.println("3. flatMap result -> " +  str);
             System.out.println();

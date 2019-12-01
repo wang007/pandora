@@ -1,24 +1,49 @@
 package com.github.wang007.listenable.future;
 
+import com.github.wang007.asyncResult.AsyncResult;
+import com.github.wang007.asyncResult.Futureable;
+import com.github.wang007.asyncResult.Handler;
 import com.github.wang007.listenable.executor.ListenableExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
- * 可监听的
- * <p>
+ * 可监听的future
+ *
+ * @see #addHandler(Handler) 添加当前future完成时的处理。
+ * @see #addHandler(Handler, Handler)，跟{@link #addHandler(Handler)}一样.
+ *
+ * 可使用{@link #map(Function),#flatMap(Function, Executor), or...}平铺回调处理器。
+ * 可链式使用，flatMap，map方法等，最后添加{@link #addHandler(Handler)} 等方法中
+ * 统一处理异常（这个可以提供极大的便利不需要在每个操作符中try catch处理异常），或处理最后一个操作的结果。
+ *
+ * eg：
+ * ListenableExecutor.create(Executor).submit(() -> {
+ *     //do something
+ * }).flatMap(v -> {
+ *    //do something. run on other runnable
+ * }).flatMap(v -> {
+ *     //do something. run on special executor and
+ * }, executor)
+ * .map(v -> {
+ *     //do something. run on the same runnable
+ * }).addHandler(v -> {
+ *     //map操作符的结果。
+ * }, err -> {
+ *     //统一处理所有的异常
+ * });
+ *
+ *
  * created by wang007 on 2019/11/28
  */
-public interface ListenableFuture<V> extends Future<V> {
+public interface ListenableFuture<V> extends Future<V>, Futureable<V> {
 
     Logger _logger = LoggerFactory.getLogger(ListenableFuture.class);
 
@@ -37,17 +62,17 @@ public interface ListenableFuture<V> extends Future<V> {
     ListenableExecutor carrierExecutor();
 
     /**
-     * add listener
+     * add handler
      * <p>
      * note: 回到一定会执行在carrierExecutor上
      *
-     * @param listener listener
+     * @param handler handler
      * @return this
      */
-    ListenableFuture<V> addListener(FutureListener<V> listener);
+    ListenableFuture<V> addHandler(Handler<AsyncResult<V>> handler);
 
     /**
-     * add listener
+     * add handler
      * <p>
      * note: 回到一定会执行在carrierExecutor上
      *
@@ -55,38 +80,38 @@ public interface ListenableFuture<V> extends Future<V> {
      * @param onFailed    失败时，回调
      * @return this
      */
-    default ListenableFuture<V> addListener(Consumer<V> onSucceeded, Consumer<Throwable> onFailed) {
+    default ListenableFuture<V> addHandler(Handler<V> onSucceeded, Handler<Throwable> onFailed) {
         Objects.requireNonNull(onSucceeded, "onSucceeded");
         Objects.requireNonNull(onFailed, "onFailed");
-        addListener(ar -> {
-            if (ar.succeeded()) onSucceeded.accept(ar.result());
-            else onFailed.accept(ar.cause());
+        addHandler(ar -> {
+            if (ar.succeeded()) onSucceeded.handle(ar.result());
+            else onFailed.handle(ar.cause());
         });
         return this;
     }
 
     /**
-     * add Succeeded listener，如果是异常的future，打印异常
+     * add Succeeded handler，如果是异常的future，打印异常
      * <p>
      * note: 回到一定会执行在carrierExecutor上
      *
      * @param onSucceeded 成功时，回调
      * @return this
      */
-    default ListenableFuture<V> addOnSucceeded(Consumer<V> onSucceeded) {
+    default ListenableFuture<V> addOnSucceeded(Handler<V> onSucceeded) {
         Objects.requireNonNull(onSucceeded, "onSucceeded");
-        addListener(onSucceeded, err -> {
+        addHandler(onSucceeded, err -> {
             _logger.warn("failed", err);
         });
         return this;
     }
 
     /**
-     * 返回在该Future的listener
+     * 返回在该Future上的异步回调处理器
      *
      * @return listeners
      */
-    List<FutureListener<V>> listeners();
+    List<Handler<AsyncResult<V>>> handlers();
 
     /**
      *
@@ -106,9 +131,9 @@ public interface ListenableFuture<V> extends Future<V> {
      *       {@link #otherwise(Function)} 的区别：otherwise处理异常结果并转换成正常的结果，立即执行。
      *       #flatMap(Function, Executor) 会再次提交到线程池上执行fn。
      * <p>
-     * 本方法通过{@link #addListener(FutureListener)} 完成的，不会产生{@link #get(long, TimeUnit),#get()}阻塞。
+     * 本方法通过{@link #addHandler(Handler)} 完成的，不会产生{@link #get(long, TimeUnit),#get()}阻塞。
      *
-     * 最后可别忘了最后使用{@link #addListener(FutureListener),#addListener(Consumer, Consumer),#addOnSucceeded(Consumer)}
+     * 最后可别忘了最后使用{@link #addHandler(Handler),#addListener(Handler, Handler),#addOnSucceeded(Handler)}
      * 获取最后一个操作符的执行结果。
      *
      * @param fn       fn
@@ -131,13 +156,13 @@ public interface ListenableFuture<V> extends Future<V> {
                 }
             };
         }
-        addListener(ar -> {
+        addHandler(ar -> {
             if (ar.succeeded()) {
                 try {
                     carrierOnRunNext.submit(() -> {
                         R apply = fn.apply(ar.result());  //执行过程有try catch了
                         then.trySuccess(apply); //设置已经正常结果了，listener中就不必处理succeeded的情况了
-                    }).addListener(ar1 -> {
+                    }).addHandler(ar1 -> {
                         if (ar1.succeeded()) {
                             //ignore
                         } else {
@@ -162,7 +187,7 @@ public interface ListenableFuture<V> extends Future<V> {
      */
     default <R> ListenableFuture<R> map(Function<? super V, ? extends R> fn) {
         ListenablePromise<R> then = ofPromise(carrierExecutor());
-        addListener(ar -> {
+        addHandler(ar -> {
             if (ar.succeeded()) {
                 try {
                     then.trySuccess(fn.apply(ar.result()));
@@ -185,7 +210,7 @@ public interface ListenableFuture<V> extends Future<V> {
      */
     default  ListenableFuture<V> otherwise(Function<? super Throwable, ? extends V> fn) {
         ListenablePromise<V> then = ofPromise(carrierExecutor());
-        addListener(ar -> {
+        addHandler(ar -> {
             if (ar.succeeded()) {
                 then.trySuccess(ar.result());
             } else {
@@ -198,7 +223,5 @@ public interface ListenableFuture<V> extends Future<V> {
         });
         return then;
     }
-
-
 
 }

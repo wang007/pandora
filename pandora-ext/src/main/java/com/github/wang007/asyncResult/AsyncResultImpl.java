@@ -1,4 +1,4 @@
-package com.github.wang007.listenable;
+package com.github.wang007.asyncResult;
 
 /**
  * 该对象不存在中间状态。要么是成功，要么是失败
@@ -9,9 +9,7 @@ package com.github.wang007.listenable;
 public class AsyncResultImpl<T> implements AsyncResult<T> {
 
     private final boolean succeeded;
-
     private final Object outcome;
-
 
     public AsyncResultImpl(boolean succeeded, Object outcome) {
         this.succeeded = succeeded;
@@ -21,7 +19,6 @@ public class AsyncResultImpl<T> implements AsyncResult<T> {
         }
         this.outcome = outcome;
     }
-
 
     @Override
     public T result() {

@@ -1,4 +1,4 @@
-package com.github.wang007.listenable;
+package com.github.wang007.asyncResult;
 
 import java.util.function.Function;
 

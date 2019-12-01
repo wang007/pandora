@@ -33,7 +33,7 @@ public class SimpleListenableFuture<V> extends AbstractListenableFuture<V> imple
             synchronized (this) {
                 notifyAll();
             }
-            notifyListeners();
+            notifyHandlers();
             return true;
         }
         return false;
@@ -45,7 +45,7 @@ public class SimpleListenableFuture<V> extends AbstractListenableFuture<V> imple
              synchronized (this) {
                  notifyAll();
              }
-             notifyListeners();
+             notifyHandlers();
              return true;
          }
          return false;
@@ -63,7 +63,7 @@ public class SimpleListenableFuture<V> extends AbstractListenableFuture<V> imple
             synchronized (this) {
                 notifyAll();
             }
-            carrierExecutor().execute(this::notifyListeners);
+            carrierExecutor().execute(this::notifyHandlers);
         }
         return false;
     }

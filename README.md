@@ -1,3 +1,10 @@
 # pandora
-最常工具封装，以及标准库中缺失的工具，eg: ListenableFuture,fluent Future
+> 就像潘多拉宝盒一样，当需要某些东西的时候，愿这里都能提供给你。
 
+### 最常工具封装，以及标准库中缺失的工具，eg: ListenableFuture, fluent Future
+
+--- 
+## pandora-ext
+> 里面主要提供标准库缺少的工具，或者标准库封装不好的加以改进并提供出来。
+
+后续会相继提供其他模块。
