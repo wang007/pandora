@@ -1,7 +1,7 @@
 package com.github.wang007.listenable.future;
 
 import com.github.wang007.asyncResult.AsyncResult;
-import com.github.wang007.asyncResult.CompletionStageResult;
+import com.github.wang007.asyncResult.AsyncStageResult;
 import com.github.wang007.asyncResult.Future;
 import com.github.wang007.asyncResult.Handler;
 import com.github.wang007.listenable.executor.ListenableExecutor;
@@ -111,7 +111,7 @@ public abstract class AbstractListenableFuture<V> implements ListenableFuture<V>
 
     protected void ifWarningForGet() {
         if (!isDone() && !ListenableRunFuture._Disable_Warning_Get_OnBlocking) {
-            _logger.warn("don't call #get or #get(timeout) directly, and instance of addListener or thenApply or...");
+            _logger.warn("don't call #get or #get(timeout) directly, and instance of addHandler or thenApply or...");
         }
     }
 
@@ -134,7 +134,7 @@ public abstract class AbstractListenableFuture<V> implements ListenableFuture<V>
     }
 
     @Override
-    public CompletionStageResult<V> toCompletionStageResult() {
+    public AsyncStageResult<V> toAsyncStageResult() {
         //TODO
         return null;
     }

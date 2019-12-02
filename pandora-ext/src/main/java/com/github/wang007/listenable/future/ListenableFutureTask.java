@@ -1,7 +1,7 @@
 package com.github.wang007.listenable.future;
 
 import com.github.wang007.asyncResult.AsyncResult;
-import com.github.wang007.asyncResult.CompletionStageResult;
+import com.github.wang007.asyncResult.AsyncStageResult;
 import com.github.wang007.asyncResult.Future;
 import com.github.wang007.asyncResult.Handler;
 import com.github.wang007.listenable.executor.ListenableExecutor;
@@ -156,8 +156,8 @@ public class ListenableFutureTask<V> extends FutureTask<V> implements Listenable
     }
 
     @Override
-    public CompletionStageResult<V> toCompletionStageResult() {
-        //TODO
+    public AsyncStageResult<V> toAsyncStageResult() {
         return null;
     }
+
 }

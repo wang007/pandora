@@ -1,7 +1,7 @@
 package com.github.wang007.listenable.future;
 
 import com.github.wang007.asyncResult.AsyncResult;
-import com.github.wang007.asyncResult.Futureable;
+import com.github.wang007.asyncResult.Asyncable;
 import com.github.wang007.asyncResult.Handler;
 import com.github.wang007.listenable.executor.ListenableExecutor;
 import org.slf4j.Logger;
@@ -43,7 +43,7 @@ import java.util.function.Function;
  *
  * created by wang007 on 2019/11/28
  */
-public interface ListenableFuture<V> extends Future<V>, Futureable<V> {
+public interface ListenableFuture<V> extends Future<V>, Asyncable<V> {
 
     Logger _logger = LoggerFactory.getLogger(ListenableFuture.class);
 

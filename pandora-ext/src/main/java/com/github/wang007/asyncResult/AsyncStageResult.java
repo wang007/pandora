@@ -3,7 +3,7 @@ package com.github.wang007.asyncResult;
 import java.util.concurrent.CompletionStage;
 
 /**
- * 异步结果的实现。与java8的CompletionStage异步api对接。
+ * 异步结果的实现。与java8的CompletionStage异步api对接。该对象主要是连接java8的{@link CompletionStage}
  *
  * 这里不继承标准库中的{@link java.util.concurrent.Future}，为了不提供阻塞的api，所有的异步结果必须使用回调处理。
  * 很遗憾的是{@link CompletionStage#toCompletableFuture()}接口api中提供了具体实现的api。fuck
@@ -12,6 +12,20 @@ import java.util.concurrent.CompletionStage;
  *
  * created by wang007 on 2019/12/2
  */
-public interface CompletionStageResult<T> extends Future<T>, CompletionStage<T> {
+public interface AsyncStageResult<T> extends Future<T>, CompletionStage<T>, Asyncable<T> {
 
+    @Override
+    default Future<T> toFuture() {
+        return this;
+    }
+
+    @Override
+    default CompletionStage<T> toCompletionStage() {
+        return this;
+    }
+
+    @Override
+    default AsyncStageResult<T> toAsyncStageResult() {
+        return this;
+    }
 }

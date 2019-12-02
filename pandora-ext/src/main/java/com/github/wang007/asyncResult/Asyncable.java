@@ -3,11 +3,15 @@ package com.github.wang007.asyncResult;
 import java.util.concurrent.CompletionStage;
 
 /**
+ * 代表一个可异步化的对象，且该对象必须有完成的动作
+ * 并通知给{@link #toFuture(),#toCompletionStage(),#toCompletionStageResult()}
  *
+ * @see Future
+ * @see AsyncStageResult
  *
  * created by wang007 on 2019/12/2
  */
-public interface Futureable<T> {
+public interface Asyncable<T> {
 
     /**
      * 代表当前future是否已完成
@@ -37,6 +41,6 @@ public interface Futureable<T> {
      *
      * @return CompletionStage
      */
-    CompletionStageResult<T> toCompletionStageResult();
+    AsyncStageResult<T> toAsyncStageResult();
 
 }

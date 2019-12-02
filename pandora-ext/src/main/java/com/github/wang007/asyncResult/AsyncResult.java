@@ -4,7 +4,8 @@ import java.util.function.Function;
 
 /**
  * copy from Vert.x
- * <a href="http://vertx.io"></a>
+ *
+ * 代表异步结果。使用{@link #result(),#cause()}之前必须调用{@link #succeeded(),#failed()}判断结果状态
  *
  * created by wang007 on 2019/11/29
  */
@@ -57,7 +58,7 @@ public interface AsyncResult<T> {
      * @param mapper the mapper function
      * @return the mapped async result
      */
-    default <U> AsyncResult<U> map(Function<T, U> mapper) {
+    default <U> AsyncResult<U> map(Function<? super T, ? extends U> mapper) {
         if (mapper == null) {
             throw new NullPointerException();
         }
@@ -127,7 +128,7 @@ public interface AsyncResult<T> {
      * @param mapper the mapper function
      * @return the mapped async result
      */
-    default AsyncResult<T> otherwise(Function<Throwable, T> mapper) {
+    default AsyncResult<T> otherwise(Function<? super Throwable, ? extends T> mapper) {
         if (mapper == null) {
             throw new NullPointerException();
         }

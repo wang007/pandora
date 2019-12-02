@@ -1,7 +1,5 @@
 package com.github.wang007.listenable.future;
 
-import com.github.wang007.asyncResult.Futureable;
-
 import java.util.concurrent.RunnableFuture;
 
 /**

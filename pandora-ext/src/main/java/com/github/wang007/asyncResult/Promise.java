@@ -1,7 +1,5 @@
 package com.github.wang007.asyncResult;
 
-import java.util.concurrent.CompletionStage;
-
 /**
  *
  * 代表{@link Future}的可写一端。
@@ -11,7 +9,7 @@ import java.util.concurrent.CompletionStage;
  *
  * created by wang007 on 2019/12/1
  */
-public interface Promise<T> extends Handler<AsyncResult<T>>, Futureable<T> {
+public interface Promise<T> extends Handler<AsyncResult<T>>, Asyncable<T> {
 
     /**
      * Marks this future as a success and notifies all

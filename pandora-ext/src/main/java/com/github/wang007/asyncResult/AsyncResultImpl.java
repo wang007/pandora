@@ -22,7 +22,7 @@ public class AsyncResultImpl<T> implements AsyncResult<T> {
 
     @Override
     public T result() {
-        if(!succeeded) throw new IllegalStateException("failed status: not result.");
+        //if(!succeeded) throw new IllegalStateException("failed status: not result.");
         return (T) outcome;
     }
 
