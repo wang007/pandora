@@ -7,6 +7,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -151,7 +152,7 @@ public interface CompletableResult<T> extends Future<T>, CompletionStage<T>, Asy
         Objects.requireNonNull(other);
         Objects.requireNonNull(fn);
         Promise<V> promise = Promise.promise();
-
+        AtomicInteger successCount = new AtomicInteger();
 
         CompletableResult<? extends U> other0 = wrap(other);
         other0.addHandler(ar -> {
