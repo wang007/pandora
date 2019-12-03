@@ -102,7 +102,7 @@ public class ListenableFutureTask<V> extends FutureTask<V> implements Listenable
                 lfs.add(handler);
             } else {
                 List<Handler<?>> lfs = new ArrayList<>();
-                lfs.add(handler);
+                lfs.add((Handler<?>) handlers);
                 lfs.add(handler);
                 this.handlers = lfs;
             }

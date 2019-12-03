@@ -6,6 +6,10 @@ import java.util.concurrent.CompletionStage;
  * 代表一个可异步化的对象，且该对象必须有完成的动作
  * 并通知给{@link #toFuture(),#toCompletionStage(),#toCompletionStageResult()}
  *
+ * 主要是{@link CompletionStage}api太垃圾了，应该要适当隔离。通过toXXX方法隔离.
+ * 喜欢{@link CompletionStage}api的话， 可以{@link #toCompletionStage()}或{@link #toCompletableResult()} 都有
+ *
+ *
  * @see Future
  * @see CompletableResult
  *

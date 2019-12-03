@@ -1,6 +1,9 @@
 package com.github.wang007.asyncResult;
 
 
+import com.github.wang007.listenable.executor.RunNowExecutor;
+
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -42,7 +45,7 @@ public interface Future<T> extends AsyncResult<T>, Asyncable<T> {
      */
     @Override
     default <R> Future<R> map(Function<? super T, ? extends R> fn) {
-        return map(fn, null);
+        return map(fn, RunNowExecutor.Executor);
     }
 
     /**
@@ -52,28 +55,26 @@ public interface Future<T> extends AsyncResult<T>, Asyncable<T> {
      * <p>
      * 此操作等价于{@link java.util.concurrent.CompletionStage#thenApplyAsync(Function, Executor)}.
      *
-     * @param fn  转换函数
-     * @param <R> 类型R
+     * @param fn       转换函数
+     * @param executor 将fn执行在声明的executor上。 executor == null，throw NPE
+     * @param <R>      类型R
      * @return 新的、可链式的Future
      */
     default <R> Future<R> map(Function<? super T, ? extends R> fn, Executor executor) {
+        Objects.requireNonNull(fn);
+        Objects.requireNonNull(executor);
         Promise<R> promise = Promise.promise();
         addHandler(ar -> {
             if (ar.succeeded()) {
                 try {
-                    if (executor == null) {
-                        R apply = fn.apply(ar.result());
-                        promise.setSuccess(apply);
-                    } else {
-                        executor.execute(() -> {
-                            try {
-                                R apply = fn.apply(ar.result());
-                                promise.setSuccess(apply);
-                            } catch (Throwable e) {
-                                promise.setFailure(e);
-                            }
-                        });
-                    }
+                    executor.execute(() -> {
+                        try {
+                            R apply = fn.apply(ar.result());
+                            promise.setSuccess(apply);
+                        } catch (Throwable e) {
+                            promise.setFailure(e);
+                        }
+                    });
                 } catch (Throwable e) {
                     promise.setFailure(e);
                 }
@@ -98,7 +99,7 @@ public interface Future<T> extends AsyncResult<T>, Asyncable<T> {
      * @return 新的、可链式的Future
      */
     default <R> Future<R> flatMap(Function<? super T, ? extends Asyncable<? extends R>> fn) {
-        return flatMap(fn, null);
+        return flatMap(fn, RunNowExecutor.Executor);
     }
 
     /**
@@ -107,12 +108,15 @@ public interface Future<T> extends AsyncResult<T>, Asyncable<T> {
      * 此操作符可平铺callback，解决callback hell
      *
      * @param fn       continuation
-     * @param executor 将fn执行在声明的executor上。 executor == null，等价于{@link #flatMap(Function)}
+     * @param executor 将fn执行在声明的executor上。 executor == null，throw NPE
      * @param <R>      类型R
      * @return 新的、可链式的Future
      * @see #flatMap(Function)
      */
     default <R> Future<R> flatMap(Function<? super T, ? extends Asyncable<? extends R>> fn, Executor executor) {
+        Objects.requireNonNull(fn);
+        Objects.requireNonNull(executor);
+
         Promise<R> promise = Promise.promise();
         Consumer<AsyncResult<T>> consumer = ar -> {
             Asyncable<? extends R> apply = fn.apply(ar.result());
@@ -127,17 +131,13 @@ public interface Future<T> extends AsyncResult<T>, Asyncable<T> {
         addHandler(ar -> {
             if (ar.succeeded()) {
                 try {
-                    if (executor == null) {
-                        consumer.accept(ar);
-                    } else {
-                        executor.execute(() -> {
-                            try {
-                                consumer.accept(ar);
-                            } catch (Throwable e) {
-                                promise.setFailure(e);
-                            }
-                        });
-                    }
+                    executor.execute(() -> {
+                        try {
+                            consumer.accept(ar);
+                        } catch (Throwable e) {
+                            promise.setFailure(e);
+                        }
+                    });
                 } catch (Throwable e) {
                     promise.setFailure(e);
                 }
@@ -156,6 +156,7 @@ public interface Future<T> extends AsyncResult<T>, Asyncable<T> {
      */
     @Override
     default Future<T> otherwise(Function<? super Throwable, ? extends T> fn) {
+        Objects.requireNonNull(fn);
         Promise<T> promise = Promise.promise();
         addHandler(ar -> {
             if (ar.succeeded()) {

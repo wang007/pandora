@@ -67,7 +67,7 @@ public abstract class AbstractListenableFuture<V> implements ListenableFuture<V>
                 lfs.add(handler);
             } else {
                 List<Handler<?>> lfs = new ArrayList<>();
-                lfs.add(handler);
+                lfs.add((Handler<?>) handlers);
                 lfs.add(handler);
                 this.handlers = lfs;
             }
