@@ -51,14 +51,14 @@ public class ListenableFutureTask<V> extends FutureTask<V> implements Listenable
     }
 
     @Override
-    protected synchronized void done() {
+    protected void done() {
         Runnable run = () -> {
             List<Handler<AsyncResult<V>>> handlers = handlers();
             handlers.forEach(ls -> {
                 try {
                     ls.handle(getAsAsyncResult());
                 } catch (Throwable e) {
-                    _logger.warn("execute onCompleted failed.", e);
+                    _logger.warn("execute handler#handle failed.", e);
                 }
             });
         };

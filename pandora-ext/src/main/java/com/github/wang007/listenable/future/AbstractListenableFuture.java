@@ -90,15 +90,13 @@ public abstract class AbstractListenableFuture<V> implements ListenableFuture<V>
      * 执行通知handler
      */
     protected void notifyHandlers() {
-        synchronized (this) {
-            handlers().forEach(ls -> {
-                try {
-                    ls.handle(getAsAsyncResult());
-                } catch (Throwable e) {
-                    _logger.warn("execute onCompleted failed.", e);
-                }
-            });
-        }
+        handlers().forEach(ls -> {
+            try {
+                ls.handle(getAsAsyncResult());
+            } catch (Throwable e) {
+                _logger.warn("execute handler#handle failed.", e);
+            }
+        });
     }
 
     protected void ifWarningForGet() {

@@ -12,6 +12,15 @@ package com.github.wang007.asyncResult;
 public interface Promise<T> extends Handler<AsyncResult<T>>, Asyncable<T> {
 
     /**
+     * 创建一个未完成的异常结果
+     * @param <R> 类型R
+     * @return this
+     */
+    static <R> Promise<R> promise() {
+        return new CompletableResultImpl<>();
+    }
+
+    /**
      * Marks this future as a success and notifies all
      * listeners.
      *

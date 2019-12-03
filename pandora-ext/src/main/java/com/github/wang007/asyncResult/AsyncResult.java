@@ -11,7 +11,6 @@ import java.util.function.Function;
  */
 public interface AsyncResult<T> {
 
-
     static <T> AsyncResult<T> succeeded(T result) {
         return new AsyncResultImpl<>(true, result);
     }
