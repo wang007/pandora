@@ -14,5 +14,5 @@ public interface ListenableRunFuture<V> extends RunnableFuture<V>, ListenableFut
     /**
      * 是否关闭
      */
-    boolean _Disable_Warning_Get_OnBlocking = Boolean.getBoolean("disable.wang007.warning.get.onBlocking");
+    boolean _Disable_Warning_Get_OnBlocking = Boolean.getBoolean("disable.wang007.warningGetOnBlocking");
 }

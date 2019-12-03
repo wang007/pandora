@@ -28,11 +28,6 @@ public interface Future<T> extends AsyncResult<T>, Asyncable<T> {
      */
     Future<T> addHandler(Handler<AsyncResult<T>> handler);
 
-    @Override
-    default Future<T> toFuture() {
-        return this;
-    }
-
     /**
      * 将类型T转换成类型R.
      *

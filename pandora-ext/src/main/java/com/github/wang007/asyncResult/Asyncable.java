@@ -7,40 +7,46 @@ import java.util.concurrent.CompletionStage;
  * 并通知给{@link #toFuture(),#toCompletionStage(),#toCompletionStageResult()}
  *
  * @see Future
- * @see AsyncStageResult
+ * @see CompletableResult
  *
  * created by wang007 on 2019/12/2
  */
 public interface Asyncable<T> {
 
     /**
-     * 代表当前future是否已完成
+     * 代表当前异步化的对象是是否已完成
      *
      * @return true: 当前future已完成，false: 未完成
      */
-    boolean isCompleted();
+    default boolean isCompleted() {
+        return toFuture().isCompleted();
+    }
 
     /**
      * 与之关联的future，当Promise设置结果时，通知到{@link Future}。
      *
      * @return future
      */
-    Future<T> toFuture();
+     default Future<T> toFuture() {
+         return toCompletableResult();
+     }
 
     /**
-     * 与之关联的Future，当Promise设置结果时，通知到{@link CompletionStage}
+     * 与之关联的CompletionStage，当Promise设置结果时，通知到{@link CompletionStage}
      * 与java标准库api关联
      *
      * @return CompletionStage
      */
-    CompletionStage<T> toCompletionStage();
+    default CompletionStage<T> toCompletionStage() {
+        return toCompletableResult();
+    }
 
     /**
-     * 与之关联的Future，当Promise设置结果时，通知到{@link CompletionStage}
+     * 与之关联的AsyncStageResult，当Promise设置结果时，通知到{@link CompletionStage}
      * 与java标准库api关联
      *
      * @return CompletionStage
      */
-    AsyncStageResult<T> toAsyncStageResult();
+    CompletableResult<T> toCompletableResult();
 
 }

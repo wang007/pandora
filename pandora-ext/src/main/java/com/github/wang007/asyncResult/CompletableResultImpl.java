@@ -26,9 +26,9 @@ import java.util.function.Function;
  *
  * created by wang007 on 2019/12/2
  */
-public class AsyncStageResultImpl<T> implements Promise<T>, AsyncStageResult<T> {
+public class CompletableResultImpl<T> implements Promise<T>, CompletableResult<T> {
 
-    private static final Logger logger = LoggerFactory.getLogger(AsyncStageResultImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(CompletableResultImpl.class);
 
 
     @Override

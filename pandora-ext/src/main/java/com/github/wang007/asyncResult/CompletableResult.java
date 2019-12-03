@@ -12,20 +12,10 @@ import java.util.concurrent.CompletionStage;
  *
  * created by wang007 on 2019/12/2
  */
-public interface AsyncStageResult<T> extends Future<T>, CompletionStage<T>, Asyncable<T> {
+public interface CompletableResult<T> extends Future<T>, CompletionStage<T>, Asyncable<T> {
 
     @Override
-    default Future<T> toFuture() {
-        return this;
-    }
-
-    @Override
-    default CompletionStage<T> toCompletionStage() {
-        return this;
-    }
-
-    @Override
-    default AsyncStageResult<T> toAsyncStageResult() {
+    default CompletableResult<T> toCompletableResult() {
         return this;
     }
 }

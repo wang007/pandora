@@ -63,9 +63,7 @@ public interface ListenableFuture<V> extends Future<V>, Asyncable<V> {
 
     /**
      * add handler
-     * <p>
-     * note: 回到一定会执行在carrierExecutor上
-     *
+     * note: 如果添加handler时异步结果已完成，那么立即执行。否则执行在{@link #carrierExecutor()}
      * @param handler handler
      * @return this
      */
@@ -73,8 +71,7 @@ public interface ListenableFuture<V> extends Future<V>, Asyncable<V> {
 
     /**
      * add handler
-     * <p>
-     * note: 回到一定会执行在carrierExecutor上
+     * note: 如果添加handler时异步结果已完成，那么立即执行。否则执行在{@link #carrierExecutor()}
      *
      * @param onSucceeded 成功时，回调
      * @param onFailed    失败时，回调
@@ -92,8 +89,7 @@ public interface ListenableFuture<V> extends Future<V>, Asyncable<V> {
 
     /**
      * add Succeeded handler，如果是异常的future，打印异常
-     * <p>
-     * note: 回到一定会执行在carrierExecutor上
+     * note: 如果添加handler时异步结果已完成，那么立即执行。否则执行在{@link #carrierExecutor()}
      *
      * @param onSucceeded 成功时，回调
      * @return this
@@ -138,7 +134,7 @@ public interface ListenableFuture<V> extends Future<V>, Asyncable<V> {
      *
      * @param fn       fn
      * @param <R>      R
-     * @param executor fn执行所在的线程池，null: 继续执行在{@link #carrierExecutor()}线程，后续的相关操作都会到这里新的Executor执行。
+     * @param executor fn执行所在的线程池，null: 继续执行在{@link #carrierExecutor()}线程。否则后续的相关操作都会到这里新的Executor执行。
      * @return result of next continuation
      */
     default <R> ListenableFuture<R> flatMap(Function<? super V, ? extends R> fn, Executor executor) {
@@ -208,7 +204,7 @@ public interface ListenableFuture<V> extends Future<V>, Asyncable<V> {
      * @param fn fn
      * @return result of next continuation
      */
-    default  ListenableFuture<V> otherwise(Function<? super Throwable, ? extends V> fn) {
+    default ListenableFuture<V> otherwise(Function<? super Throwable, ? extends V> fn) {
         ListenablePromise<V> then = ofPromise(carrierExecutor());
         addHandler(ar -> {
             if (ar.succeeded()) {

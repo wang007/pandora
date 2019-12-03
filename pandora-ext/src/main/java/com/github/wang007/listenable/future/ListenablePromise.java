@@ -1,8 +1,6 @@
 package com.github.wang007.listenable.future;
 
-import com.github.wang007.asyncResult.Future;
 import com.github.wang007.asyncResult.Promise;
-
 import java.util.concurrent.CompletionStage;
 
 /**
@@ -27,14 +25,7 @@ public interface ListenablePromise<V> extends ListenableFuture<V>, Promise<V> {
     }
 
     @Override
-    default Future<V> toFuture() {
-
-        return null;
-    }
-
-    @Override
     default CompletionStage<V> toCompletionStage() {
-
         return null;
     }
 }

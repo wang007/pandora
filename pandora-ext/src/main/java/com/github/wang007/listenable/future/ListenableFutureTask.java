@@ -1,8 +1,7 @@
 package com.github.wang007.listenable.future;
 
 import com.github.wang007.asyncResult.AsyncResult;
-import com.github.wang007.asyncResult.AsyncStageResult;
-import com.github.wang007.asyncResult.Future;
+import com.github.wang007.asyncResult.CompletableResult;
 import com.github.wang007.asyncResult.Handler;
 import com.github.wang007.listenable.executor.ListenableExecutor;
 
@@ -92,12 +91,7 @@ public class ListenableFutureTask<V> extends FutureTask<V> implements Listenable
     @Override
     public ListenableFuture<V> addHandler(Handler<AsyncResult<V>> handler) {
         if (isDone()) {
-            //回到carrierExecutor执行handler
-            if(carrierExecutor().inCurrentExecutor()) {
-                handler.handle(getAsAsyncResult());
-            } else {
-                carrierExecutor().execute(() -> handler.handle(getAsAsyncResult()));
-            }
+            handler.handle(getAsAsyncResult());
             return this;
         }
 
@@ -119,7 +113,7 @@ public class ListenableFutureTask<V> extends FutureTask<V> implements Listenable
 
 
     @Override
-    public List<Handler<AsyncResult<V>>> handlers() {
+    public synchronized List<Handler<AsyncResult<V>>> handlers() {
         Object handlers = this.handlers;
         if (handlers == null) return Collections.emptyList();
         else if (handlers instanceof List) {
@@ -136,27 +130,8 @@ public class ListenableFutureTask<V> extends FutureTask<V> implements Listenable
         }
     }
 
-
     @Override
-    public boolean isCompleted() {
-        //TODO
-        return false;
-    }
-
-    @Override
-    public Future<V> toFuture() {
-        //TODO
-        return null;
-    }
-
-    @Override
-    public CompletionStage<V> toCompletionStage() {
-        //TODO
-        return null;
-    }
-
-    @Override
-    public AsyncStageResult<V> toAsyncStageResult() {
+    public CompletableResult<V> toCompletableResult() {
         return null;
     }
 

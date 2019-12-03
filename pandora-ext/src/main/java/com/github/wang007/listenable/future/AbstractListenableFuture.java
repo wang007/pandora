@@ -1,15 +1,13 @@
 package com.github.wang007.listenable.future;
 
 import com.github.wang007.asyncResult.AsyncResult;
-import com.github.wang007.asyncResult.AsyncStageResult;
-import com.github.wang007.asyncResult.Future;
+import com.github.wang007.asyncResult.CompletableResult;
 import com.github.wang007.asyncResult.Handler;
 import com.github.wang007.listenable.executor.ListenableExecutor;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -59,15 +57,9 @@ public abstract class AbstractListenableFuture<V> implements ListenableFuture<V>
     @Override
     public ListenableFuture<V> addHandler(Handler<AsyncResult<V>> handler) {
         if (isDone()) {
-            //回到carrierExecutor执行handler
-            if(carrierExecutor().inCurrentExecutor()) {
-                handler.handle(getAsAsyncResult());
-            } else {
-                carrierExecutor().execute(() -> handler.handle(getAsAsyncResult()));
-            }
+            handler.handle(getAsAsyncResult());
             return this;
         }
-
         synchronized (this) {
             if (handlers == null) handlers = handler;
             else if (handlers instanceof List) {
@@ -84,7 +76,7 @@ public abstract class AbstractListenableFuture<V> implements ListenableFuture<V>
     }
 
     @Override
-    public List<Handler<AsyncResult<V>>> handlers() {
+    public synchronized List<Handler<AsyncResult<V>>> handlers() {
         Object handlers = this.handlers;
         if (handlers == null) return Collections.emptyList();
         else if (handlers instanceof List) {
@@ -116,25 +108,7 @@ public abstract class AbstractListenableFuture<V> implements ListenableFuture<V>
     }
 
     @Override
-    public boolean isCompleted() {
-        //TODO
-        return false;
-    }
-
-    @Override
-    public Future<V> toFuture() {
-        //TODO
-        return null;
-    }
-
-    @Override
-    public CompletionStage<V> toCompletionStage() {
-        //TODO
-        return null;
-    }
-
-    @Override
-    public AsyncStageResult<V> toAsyncStageResult() {
+    public CompletableResult<V> toCompletableResult() {
         //TODO
         return null;
     }
