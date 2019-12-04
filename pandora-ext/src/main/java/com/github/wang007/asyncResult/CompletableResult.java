@@ -1,10 +1,8 @@
 package com.github.wang007.asyncResult;
 
 import com.github.wang007.listenable.executor.RunNowExecutor;
-import jdk.nashorn.internal.ir.annotations.Ignore;
+import com.github.wang007.utils.ObjectUtils;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -22,40 +20,61 @@ import java.util.function.Function;
  * 这里不继承标准库中的{@link java.util.concurrent.Future}，为了不提供阻塞的api，所有的异步结果必须使用回调处理。
  * 很遗憾的是{@link CompletionStage#toCompletableFuture()}接口api中提供了具体实现的api。fuck
  * <p>
- * 尽管{@link CompletionStage}的api极其丑陋，但是没办法，它标准库api的实现。
+ * 尽管{@link CompletionStage}的api极其丑陋，但是没办法，它标准库api的实现。方便在java开源库中做适配。
+ *
+ * 对{@link CompletionStage}做一个分类
  * <p>
+ * 一：在异步结果正常完成时调用。区别在于入参和出参。 fuck api  相当于reactive#map
+ * 1. {@link #thenApply(Function),#thenApplyAsync(Function),#thenApplyAsync(Function, Executor)}
+ *
+ * 2. {@link #thenAccept(Consumer),#thenAcceptAsync(Consumer),#thenAcceptAsync(Consumer, Executor)}
+ *
+ * 3. {@link #thenRun(Runnable),#thenRunAsync(Runnable),#thenAcceptAsync(Consumer, Executor)}
+ * <p>
+ * 二：当两个异步结果都正常完成时调用，区别在于入参和出参。fuck api  相当于reactive#zipWith
+ * 1. {@link #thenCombine(CompletionStage, BiFunction),#thenCombineAsync(CompletionStage, BiFunction)}
+ *    {@link #thenCombineAsync(CompletionStage, BiFunction, Executor)}
+ *
+ * 2. {@link #thenAcceptBoth(CompletionStage, BiConsumer),#thenAcceptBothAsync(CompletionStage, BiConsumer),
+ *     {@link #thenAcceptBothAsync(CompletionStage, BiConsumer, Executor)}
+ *
+ * 3. {@link #runAfterBoth(CompletionStage, Runnable),#runAfterBothAsync(CompletionStage, Runnable)}
+ *    {@link #runAfterBothAsync(CompletionStage, Runnable, Executor)}
+ *
+ * 三：两个异步结果任意其中之一正常完成时调用，区别在于入参和出参。 fuck api  相当于reactive#ambWith && map
+ * 1.{@link #applyToEither(CompletionStage, Function),#applyToEitherAsync(CompletionStage, Function)}
+ *   {@link #applyToEitherAsync(CompletionStage, Function, Executor)}
+ *
+ * 2. {@link #acceptEither(CompletionStage, Consumer),#acceptEitherAsync(CompletionStage, Consumer)}
+ * {@link #acceptEitherAsync(CompletionStage, Consumer, Executor)}
+ *
+ * 3. {@link #runAfterEither(CompletionStage, Runnable),#runAfterEitherAsync(CompletionStage, Runnable)}
+ *    {@link #runAfterEitherAsync(CompletionStage, Runnable, Executor)}
+ *
+ *
+ * 四：当 前一个异步结果正常完成时产生一个新的不同类型的异步结果。  挺好。 相当于reactive#flatMap
+ * 1. {@link #thenCompose(Function),#thenComposeAsync(Function, Executor),#thenComposeAsync(Function)}
+ * <p>
+ *
+ * 五：当异步结果异常完成时调用  相当于reactive#onErrorReturn
+ * 1. {@link #exceptionally(Function)}
+ *
+ * <p>
+ * 六: 当异步结果完成(包括正常或异常)时调用。 相当于reactive#doOnSubscribe
+ * 1.{@link #whenComplete(BiConsumer),#whenCompleteAsync(BiConsumer),#whenCompleteAsync(BiConsumer, Executor)}
+ * 2. {@link #handle(BiFunction),#handleAsync(BiFunction),#handleAsync(BiFunction, Executor)}
+ *
  * created by wang007 on 2019/12/2
  */
 public interface CompletableResult<T> extends Future<T>, CompletionStage<T>, Asyncable<T> {
-
-    static <R> CompletableResult<R> wrap(CompletionStage<R> cs) {
-        Objects.requireNonNull(cs);
-        Promise<R> promise = Promise.promise();
-        cs.handle((r, err) -> {
-            AsyncResult<R> ar;
-            if (err != null) {
-                ar = AsyncResult.failed(err);
-            } else {
-                ar = AsyncResult.succeeded(r);
-            }
-            promise.handle(ar);
-            return null;
-        });
-        return promise.toCompletableResult();
-    }
-
-    static <R> CompletableResult<R> wrap(Asyncable<R> aa) {
-        Objects.requireNonNull(aa);
-        Promise<R> promise = Promise.promise();
-        aa.toFuture().addHandler(promise);
-        return promise.toCompletableResult();
-    }
 
 
     @Override
     default CompletableResult<T> toCompletableResult() {
         return this;
     }
+
+    //================================ Future ==================================
 
     @Override
     default <R> CompletableResult<R> map(Function<? super T, ? extends R> fn) {
@@ -84,7 +103,8 @@ public interface CompletableResult<T> extends Future<T>, CompletionStage<T>, Asy
         return Future.super.otherwise(fn).toCompletableResult();
     }
 
-    //========= CompletionStage ============
+
+    //================================= CompletionStage =========================
 
     @Override
     default <U> CompletableResult<U> thenApply(Function<? super T, ? extends U> fn) {
@@ -155,40 +175,41 @@ public interface CompletableResult<T> extends Future<T>, CompletionStage<T>, Asy
     @SuppressWarnings("unchecked")
     @Override
     default <U, V> CompletableResult<V> thenCombineAsync(CompletionStage<? extends U> other, BiFunction<? super T, ? super U, ? extends V> fn, Executor executor) {
-        Objects.requireNonNull(other);
-        Objects.requireNonNull(fn);
-        Objects.requireNonNull(executor);
+        ObjectUtils.requireNonNull(other, fn, executor);
 
         Promise<V> promise = Promise.promise();
+        CompletableResult<? extends U> other0 = Async.wrap(other);
         AtomicInteger successCount = new AtomicInteger();
         AtomicBoolean ifExec = new AtomicBoolean();
         AtomicReference<Object> ref0 = new AtomicReference<>();
         AtomicReference<Object> ref1 = new AtomicReference<>();
 
-        CompletableResult<? extends U> other0 = wrap(other);
+        BiConsumer<T, U> bc = (t, u) -> {
+            try {
+                executor.execute(() -> {
+                    try {
+                        V apply = fn.apply(t, u);
+                        promise.setSuccess(apply);
+                    } catch (Throwable e1) {
+                        promise.setFailure(e1);
+                    }
+                });
+            } catch (Throwable e) {
+                promise.setFailure(cause());
+            }
+        };
+
         other0.addHandler(ar -> {
             if (ar.succeeded()) {
                 ref0.set(ar.result());
                 if (successCount.incrementAndGet() == 2 && ifExec.compareAndSet(false, true)) {
                     T t = (T) ref1.get();
                     U u = ar.result();
-                    try {
-                        executor.execute(() -> {
-                            try {
-                                V apply = fn.apply(t, u);
-                                promise.setSuccess(apply);
-                            } catch (Throwable e1) {
-                                promise.setFailure(e1);
-                            }
-                        });
-                    } catch (Throwable e) {
-                        promise.setFailure(cause());
-                    }
+                    bc.accept(t, u);
                 }
                 return;
             }
             if (ifExec.compareAndSet(false, true)) promise.setFailure(ar.cause());
-
         });
         addHandler(ar -> {
             if (ar.succeeded()) {
@@ -196,18 +217,7 @@ public interface CompletableResult<T> extends Future<T>, CompletionStage<T>, Asy
                 if (successCount.incrementAndGet() == 2 && ifExec.compareAndSet(false, true)) {
                     T t = ar.result();
                     U u = (U) ref0.get();
-                    try {
-                        executor.execute(() -> {
-                            try {
-                                V apply = fn.apply(t, u);
-                                promise.setSuccess(apply);
-                            } catch (Throwable e1) {
-                                promise.setFailure(e1);
-                            }
-                        });
-                    } catch (Throwable e) {
-                        promise.setFailure(cause());
-                    }
+                    bc.accept(t, u);
                 }
                 return;
             }
@@ -268,15 +278,13 @@ public interface CompletableResult<T> extends Future<T>, CompletionStage<T>, Asy
 
     @Override
     default <U> CompletableResult<U> applyToEitherAsync(CompletionStage<? extends T> other, Function<? super T, U> fn, Executor executor) {
-        Objects.requireNonNull(other);
-        Objects.requireNonNull(fn);
-        Objects.requireNonNull(executor);
+        ObjectUtils.requireNonNull(other, fn, executor);
 
         Promise<U> promise = Promise.promise();
         AtomicInteger failedCount = new AtomicInteger();
         AtomicBoolean ifExec = new AtomicBoolean();
 
-        CompletableResult<? extends T> other0 = wrap(other);
+        CompletableResult<? extends T> other0 = Async.wrap(other);
 
         Handler<AsyncResult<? extends T>> handler = ar -> {
             if (ar.succeeded()) {
@@ -361,8 +369,7 @@ public interface CompletableResult<T> extends Future<T>, CompletionStage<T>, Asy
 
     @Override
     default <U> CompletableResult<U> thenComposeAsync(Function<? super T, ? extends CompletionStage<U>> fn, Executor executor) {
-        Objects.requireNonNull(fn);
-        Objects.requireNonNull(executor);
+        ObjectUtils.requireNonNull(fn, executor);
 
         Promise<U> promise = Promise.promise();
         addHandler(ar -> {
@@ -430,8 +437,7 @@ public interface CompletableResult<T> extends Future<T>, CompletionStage<T>, Asy
 
     @Override
     default <U> CompletableResult<U> handleAsync(BiFunction<? super T, Throwable, ? extends U> fn, Executor executor) {
-        Objects.requireNonNull(fn);
-        Objects.requireNonNull(executor);
+        ObjectUtils.requireNonNull(fn, executor);
 
         Promise<U> promise = Promise.promise();
         addHandler(ar -> {

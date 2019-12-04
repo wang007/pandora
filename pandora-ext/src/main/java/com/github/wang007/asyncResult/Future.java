@@ -9,10 +9,21 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
- * 当前future所有操作，都不会产生阻塞。
- * <p>
- * {@link java.util.concurrent.Future}是阻塞式api
- * <p>
+ * 代表异步结果。当前future所有操作，都不会产生阻塞。
+ *
+ * 1. {@link #map(Function),#map(Function, Executor)}对异步结果进行转换，当且仅当异步结果正常时才执行。相当于reactive#map操作符
+ * 2. {@link #flatMap(Function),#map(Function, Executor)}对异步结果转换另一种异步结果，当且仅当异步结果正常时才执行。参考reactive#flatMap操作符
+ * 3. {@link #otherwise(Function)}对异常的异步结果转换成正常的异步结果，当且仅当结果异常时才执行。相当于reactive#doOnError操作符
+ * 4. 以上所有的参考都已经用try catch包住了，操作符处理，操作符与操作符之间可以不处理异常，通过在{@link #addHandler(Handler)}统一
+ *    处理异常。
+ * 5. {@link #addHandler(Handler)}对异步结果处理。相当于reactive#subscribe操作符
+ *
+ * {@link java.util.concurrent.Future}是阻塞式api。
+ *
+ * note: 使用{@link #result(),#cause()}获取异步结果时，务必使用{@link #succeeded(),#failed()}判断当前异步结果的状态，
+ *       否则可能发生类型转换异常。
+ *
+ *
  * created by wang007 on 2019/12/1
  */
 public interface Future<T> extends AsyncResult<T>, Asyncable<T> {

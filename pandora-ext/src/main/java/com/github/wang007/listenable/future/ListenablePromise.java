@@ -26,6 +26,8 @@ public interface ListenablePromise<V> extends ListenableFuture<V>, Promise<V> {
 
     @Override
     default CompletionStage<V> toCompletionStage() {
-        return null;
+        Promise<V> promise = Promise.promise();
+        addHandler(promise);
+        return promise.toCompletableResult();
     }
 }

@@ -1,5 +1,7 @@
 package listenable;
 
+import com.github.wang007.expDsl.Try;
+
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -8,7 +10,7 @@ import java.util.concurrent.CompletableFuture;
 public class Test {
 
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void main1(String[] args) throws InterruptedException {
         CompletableFuture<String> fut = new CompletableFuture<>();
         new Thread(() -> {
             fut.thenAccept(v1 -> {
@@ -37,5 +39,33 @@ public class Test {
         new Thread(() -> fut.complete("111"), "thread-2").start();
 
         new Thread(() -> fut.thenAccept(str -> {}), "thread-3").start();
+    }
+
+    public static void main(String[] args) {
+
+        Try.doTry(() -> {
+            System.out.println("dsdfasdf");
+            return null;
+
+        }).doCatch(RuntimeException.class, err -> {
+            return "String";
+
+        }).doCatch(Exception.class, err -> {
+           return null;
+
+        }).doFinally(t -> {
+            System.out.println("hello");
+        }).run();
+
+
+        Try.doTry(() -> {
+            System.out.println("doTry");
+            return null;
+        }).doCatch(Error.class, err -> {
+            return null;
+        }).run();
+
+
+
     }
 }

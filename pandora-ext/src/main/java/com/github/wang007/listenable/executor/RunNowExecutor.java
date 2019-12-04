@@ -11,7 +11,7 @@ public class RunNowExecutor implements Executor {
 
     public final static RunNowExecutor Executor = new RunNowExecutor();
 
-    private RunNowExecutor(){}
+    RunNowExecutor(){}
 
     @Override
     public void execute(Runnable command) {

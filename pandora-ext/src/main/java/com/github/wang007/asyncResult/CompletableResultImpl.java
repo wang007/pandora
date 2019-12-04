@@ -10,50 +10,18 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
-import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
-import java.util.function.Consumer;
-import java.util.function.Function;
+
 
 
 /**
  * {@link Promise,Future, AsyncStageResult}的标准实现。
  * <p>
- * 此api非open api
+ * 此api非open api,非常不建议直接依赖这个对象
  * <p>
  * fuck {@link CompletableFuture} api，由于里面实现，添加操作符的时候，如果这个{@link CompletableFuture}已处于一个
  * 完成时的状态时，当前添加操作符所在的线程会帮助处理之前添加在该{@link CompletableFuture}的操作符，那么会导致操作符的处
- * 理调用线程不确定。 fuck
- * <p>
- * 对{@link CompletionStage}做一个分类
- * <p>
- * 一：在异步结果正常完成时调用。区别在于入参和出参。 fuck api
- * 1. {@link #thenApply(Function),#thenApplyAsync(Function),#thenApplyAsync(Function, Executor)}
- * 2. {@link #thenAccept(Consumer),#thenAcceptAsync(Consumer),#thenAcceptAsync(Consumer, Executor)}
- * 3. {@link #thenRun(Runnable),#thenRunAsync(Runnable),#thenAcceptAsync(Consumer, Executor)}
- * <p>
- * 二：当两个异步结果都正常完成时调用，区别在于入参和出参。fuck api
- * 1. {@link #thenCombine(CompletionStage, BiFunction),#thenCombineAsync(CompletionStage, BiFunction),#thenCombineAsync(CompletionStage, BiFunction, Executor)}
- * 2. {@link #thenAcceptBoth(CompletionStage, BiConsumer),#thenAcceptBothAsync(CompletionStage, BiConsumer),#thenAcceptBothAsync(CompletionStage, BiConsumer, Executor)}
- * 3. {@link #runAfterBoth(CompletionStage, Runnable),#runAfterBothAsync(CompletionStage, Runnable),#runAfterBothAsync(CompletionStage, Runnable, Executor)}
- * <p>
- * 三：两个异步结果任意其中之一正常完成时调用，区别在于入参和出参。 fuck api
- * 1.{@link #applyToEither(CompletionStage, Function),#applyToEitherAsync(CompletionStage, Function),#applyToEitherAsync(CompletionStage, Function, Executor)}
- * 2. {@link #acceptEither(CompletionStage, Consumer),#acceptEitherAsync(CompletionStage, Consumer),#acceptEitherAsync(CompletionStage, Consumer, Executor)}
- * 3. {@link #runAfterEither(CompletionStage, Runnable),#runAfterEitherAsync(CompletionStage, Runnable),#runAfterEitherAsync(CompletionStage, Runnable, Executor)}
- * <p>
- * 四：当 前一个异步结果正常完成时产生一个新的不同类型的异步结果。  挺好。
- * 1. {@link #thenCompose(Function),#thenComposeAsync(Function, Executor),#thenComposeAsync(Function)}
- * <p>
- * 五：当异步结果异常完成时调用
- * 1. {@link #exceptionally(Function)}
- * <p>
- * 六: 当异步结果完成(包括正常或异常)时调用。
- * 1.{@link #whenComplete(BiConsumer),#whenCompleteAsync(BiConsumer),#whenCompleteAsync(BiConsumer, Executor)}
- * 2. {@link #handle(BiFunction),#handleAsync(BiFunction),#handleAsync(BiFunction, Executor)}
- * <p>
+ * 理调用线程不确定。(不同版本的java8 实现出入还挺大。) 因此为了确保回调出发点，重写了{@link CompletionStage}，而非直接继承{@link CompletableFuture}
  * <p>
  * <p>
  * created by wang007 on 2019/12/2
@@ -72,11 +40,9 @@ public class CompletableResultImpl<T> implements CompletableResult<T>, Promise<T
 
     private static class CauseHolder {
         public Throwable cause;
-
         public CauseHolder(Throwable cause) {
             this.cause = cause;
         }
-
         public static CauseHolder cause(Throwable cause) {
             Objects.requireNonNull(cause, "cause");
             return new CauseHolder(cause);

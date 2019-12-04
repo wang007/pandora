@@ -3,6 +3,7 @@ package com.github.wang007.listenable.future;
 import com.github.wang007.asyncResult.AsyncResult;
 import com.github.wang007.asyncResult.CompletableResult;
 import com.github.wang007.asyncResult.Handler;
+import com.github.wang007.asyncResult.Promise;
 import com.github.wang007.listenable.executor.ListenableExecutor;
 
 import java.util.ArrayList;
@@ -107,7 +108,8 @@ public abstract class AbstractListenableFuture<V> implements ListenableFuture<V>
 
     @Override
     public CompletableResult<V> toCompletableResult() {
-        //TODO
-        return null;
+        Promise<V> promise = Promise.promise();
+        addHandler(promise);
+        return promise.toCompletableResult();
     }
 }

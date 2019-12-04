@@ -4,6 +4,7 @@ import com.github.wang007.asyncResult.AsyncResult;
 import com.github.wang007.asyncResult.Asyncable;
 import com.github.wang007.asyncResult.Handler;
 import com.github.wang007.listenable.executor.ListenableExecutor;
+import com.github.wang007.listenable.executor.RunNowExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -134,15 +135,17 @@ public interface ListenableFuture<V> extends Future<V>, Asyncable<V> {
      *
      * @param fn       fn
      * @param <R>      R
-     * @param executor fn执行所在的线程池，null: 继续执行在{@link #carrierExecutor()}线程。否则后续的相关操作都会到这里新的Executor执行。
+     * @param executor fn执行所在的线程池，null: throw NPE
      * @return result of next continuation
      */
     default <R> ListenableFuture<R> flatMap(Function<? super V, ? extends R> fn, Executor executor) {
         ListenablePromise<R> then;
 
-        ListenableExecutor carrierOnRunNext = executor == null ?
+        boolean ifExecOnLocal = executor instanceof RunNowExecutor;
+
+        ListenableExecutor carrierOnRunNext = ifExecOnLocal ?
                 carrierExecutor() : ListenableExecutor.create(executor); //execute next continuation on carrier
-        if (executor == null) {
+        if (ifExecOnLocal) {
             then = ofPromise(carrierExecutor());
         } else {
             then = new SimpleListenableFuture<R>(carrierExecutor()) {
