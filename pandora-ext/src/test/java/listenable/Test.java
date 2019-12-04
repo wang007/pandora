@@ -43,29 +43,5 @@ public class Test {
 
     public static void main(String[] args) {
 
-        Try.doTry(() -> {
-            System.out.println("dsdfasdf");
-            return null;
-
-        }).doCatch(RuntimeException.class, err -> {
-            return "String";
-
-        }).doCatch(Exception.class, err -> {
-           return null;
-
-        }).doFinally(t -> {
-            System.out.println("hello");
-        }).run();
-
-
-        Try.doTry(() -> {
-            System.out.println("doTry");
-            return null;
-        }).doCatch(Error.class, err -> {
-            return null;
-        }).run();
-
-
-
     }
 }
