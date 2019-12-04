@@ -89,7 +89,7 @@ public interface Async {
     static <R> CompletableResult<R> wrap(CompletionStage<R> cs) {
         Objects.requireNonNull(cs);
         Promise<R> promise = Promise.promise();
-        cs.handle((r, err) -> {
+        cs.whenComplete((r, err) -> {
             AsyncResult<R> ar;
             if (err != null) {
                 ar = AsyncResult.failed(err);
@@ -97,7 +97,6 @@ public interface Async {
                 ar = AsyncResult.succeeded(r);
             }
             promise.handle(ar);
-            return null;
         });
         return promise.toCompletableResult();
     }
