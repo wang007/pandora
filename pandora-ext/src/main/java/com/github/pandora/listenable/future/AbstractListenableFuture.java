@@ -9,6 +9,7 @@ import com.github.pandora.listenable.executor.ListenableExecutor;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -57,6 +58,7 @@ public abstract class AbstractListenableFuture<V> implements ListenableFuture<V>
 
     @Override
     public ListenableFuture<V> addHandler(Handler<AsyncResult<V>> handler) {
+        Objects.requireNonNull(handler);
         if (isDone()) {
             handler.handle(getAsAsyncResult());
             return this;

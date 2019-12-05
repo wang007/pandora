@@ -7,7 +7,7 @@ package com.github.pandora.asyncResult;
  *
  * 例如: {@link com.github.pandora.listenable.future.ListenableFuture#addHandler(Handler)} 回调通知该监听的future结果已完成。
  *
- * created by pandora on 2019/12/1
+ * created by wang007 on 2019/12/1
  */
 @FunctionalInterface
 public interface Handler<T> {

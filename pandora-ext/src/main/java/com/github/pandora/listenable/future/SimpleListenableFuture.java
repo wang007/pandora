@@ -12,7 +12,7 @@ import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 /**
  * 可设置结果的{@link ListenableFuture}
  *
- * created by pandora on 2019/11/30
+ * created by wang007 on 2019/11/30
  */
 public class SimpleListenableFuture<V> extends AbstractListenableFuture<V> implements ListenablePromise<V> {
 

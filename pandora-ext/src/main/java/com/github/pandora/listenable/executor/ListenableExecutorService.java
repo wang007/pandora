@@ -8,7 +8,7 @@ import java.util.concurrent.ExecutorService;
 /**
  * 可监听的ExecutorService
  *
- * created by pandora on 2019/11/29
+ * created by wang007 on 2019/11/29
  */
 public interface ListenableExecutorService extends ExecutorService, ListenableExecutor {
 

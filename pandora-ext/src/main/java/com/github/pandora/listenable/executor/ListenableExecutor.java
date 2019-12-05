@@ -10,7 +10,7 @@ import java.util.concurrent.ExecutorService;
  *
  * see {@link ListenableFuture}
  *
- * created by pandora on 2019/11/29
+ * created by wang007 on 2019/11/29
  */
 public interface ListenableExecutor extends Executor {
 

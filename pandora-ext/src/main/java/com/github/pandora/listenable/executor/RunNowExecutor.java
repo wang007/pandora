@@ -5,7 +5,7 @@ import java.util.concurrent.Executor;
 /**
  * 立即执行{@link Runnable}
  *
- * created by pandora on 2019/12/3
+ * created by wang007 on 2019/12/3
  */
 public class RunNowExecutor implements Executor {
 

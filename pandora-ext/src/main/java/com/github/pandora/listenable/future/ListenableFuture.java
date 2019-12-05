@@ -1,8 +1,6 @@
 package com.github.pandora.listenable.future;
 
-import com.github.pandora.asyncResult.AsyncResult;
-import com.github.pandora.asyncResult.Asyncable;
-import com.github.pandora.asyncResult.Handler;
+import com.github.pandora.asyncResult.*;
 import com.github.pandora.listenable.executor.ListenableExecutor;
 import com.github.pandora.listenable.executor.RunNowExecutor;
 import org.slf4j.Logger;
@@ -55,6 +53,11 @@ public interface ListenableFuture<V> extends Future<V>, Asyncable<V> {
      */
     static <T> ListenablePromise<T> ofPromise(ListenableExecutor executor) {
         return new SimpleListenableFuture<>(executor);
+    }
+
+    static <T> ListenablePromise<T> ofPromise(ListenableExecutor executor, T result) {
+        ListenablePromise<T> promise = ofPromise(executor);
+        return promise.setSuccess(result);
     }
 
     /**
@@ -118,7 +121,7 @@ public interface ListenableFuture<V> extends Future<V>, Asyncable<V> {
      * @see #flatMap(Function)
      */
     default <R> ListenableFuture<R> flatMap(Function<? super V, ? extends R> fn) {
-        return flatMap(fn, null);
+        return flatMap(fn, RunNowExecutor.Executor);
     }
 
     /**
@@ -221,6 +224,13 @@ public interface ListenableFuture<V> extends Future<V>, Asyncable<V> {
             }
         });
         return then;
+    }
+
+    @Override
+    default CompletableResult<V> toCompletableResult() {
+        Promise<V> promise = Promise.promise();
+        addHandler(promise);
+        return promise.toCompletableResult();
     }
 
 }

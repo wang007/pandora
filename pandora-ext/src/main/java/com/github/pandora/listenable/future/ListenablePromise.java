@@ -7,7 +7,7 @@ import java.util.concurrent.CompletionStage;
  *
  * Special {@link ListenableFuture} which is writable.
  *
- * created by pandora on 2019/11/30
+ * created by wang007 on 2019/11/30
  */
 public interface ListenablePromise<V> extends ListenableFuture<V>, Promise<V> {
 

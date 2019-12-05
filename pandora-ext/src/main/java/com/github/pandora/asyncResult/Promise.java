@@ -7,7 +7,7 @@ package com.github.pandora.asyncResult;
  * {@link #toFuture()}，为了让Promise与Future分离。
  * {@link Promise}只关心写结果，而{@link Future} 只关心对异常结果的处理。
  *
- * created by pandora on 2019/12/1
+ * created by wang007 on 2019/12/1
  */
 public interface Promise<T> extends Handler<AsyncResult<T>>, Asyncable<T> {
 

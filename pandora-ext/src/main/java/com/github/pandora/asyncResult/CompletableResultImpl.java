@@ -24,7 +24,7 @@ import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
  * 理调用线程不确定。(不同版本的java8 实现出入还挺大。) 因此为了确保回调出发点，重写了{@link CompletionStage}，而非直接继承{@link CompletableFuture}
  * <p>
  * <p>
- * created by pandora on 2019/12/2
+ * created by wang007 on 2019/12/2
  */
 public class CompletableResultImpl<T> implements CompletableResult<T>, Promise<T> {
 

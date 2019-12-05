@@ -11,7 +11,7 @@ import java.util.concurrent.CompletionStage;
  * 创建{@link Asyncable}对象，可使用{@link #succeededFuture(Object),#failedFuture(Throwable)}, {@link #succeededStage(Object),#failedResult(Throwable)}
  *
  *
- * created by pandora on 2019/12/4
+ * created by wang007 on 2019/12/4
  */
 public interface Async {
 

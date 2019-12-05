@@ -7,7 +7,7 @@ import java.util.concurrent.RunnableFuture;
  * 作为可提交到{@link java.util.concurrent.Executor}的任务
  *
  *
- * created by pandora on 2019/11/29
+ * created by wang007 on 2019/11/29
  */
 public interface ListenableRunFuture<V> extends RunnableFuture<V>, ListenableFuture<V> {
 

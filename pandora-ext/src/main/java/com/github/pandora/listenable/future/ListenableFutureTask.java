@@ -8,6 +8,7 @@ import com.github.pandora.listenable.executor.ListenableExecutor;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.*;
 
 /**
@@ -51,6 +52,11 @@ public class ListenableFutureTask<V> extends FutureTask<V> implements Listenable
     }
 
     @Override
+    public boolean isCompleted() {
+        return isDone();
+    }
+
+    @Override
     protected void done() {
         Runnable run = () -> {
             List<Handler<AsyncResult<V>>> handlers = handlers();
@@ -90,6 +96,7 @@ public class ListenableFutureTask<V> extends FutureTask<V> implements Listenable
 
     @Override
     public ListenableFuture<V> addHandler(Handler<AsyncResult<V>> handler) {
+        Objects.requireNonNull(handler);
         if (isDone()) {
             handler.handle(getAsAsyncResult());
             return this;
@@ -130,9 +137,5 @@ public class ListenableFutureTask<V> extends FutureTask<V> implements Listenable
         }
     }
 
-    @Override
-    public CompletableResult<V> toCompletableResult() {
-        return null;
-    }
 
 }

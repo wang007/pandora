@@ -13,7 +13,7 @@ import java.util.concurrent.CompletionStage;
  * @see Future
  * @see CompletableResult
  *
- * created by pandora on 2019/12/2
+ * created by wang007 on 2019/12/2
  */
 public interface Asyncable<T> {
 

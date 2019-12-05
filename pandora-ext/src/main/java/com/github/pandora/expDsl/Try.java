@@ -16,7 +16,7 @@ import java.util.function.Function;
  * <p>
  * idea from  Scala Try API
  * <p>
- * created by pandora on 2019/12/4
+ * created by wang007 on 2019/12/4
  */
 public interface Try<T> extends AsyncResult<T> {
 

@@ -1,7 +1,7 @@
 package com.github.pandora.utils;
 
 /**
- * created by pandora on 2019/12/4
+ * created by wang007 on 2019/12/4
  */
 public class ObjectUtils {
 

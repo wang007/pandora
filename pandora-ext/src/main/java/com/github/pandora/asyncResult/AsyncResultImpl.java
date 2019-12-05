@@ -4,7 +4,7 @@ package com.github.pandora.asyncResult;
  * 该对象不存在中间状态。要么是成功，要么是失败
  * immutable object
  *
- * created by pandora on 2019/11/29
+ * created by wang007 on 2019/11/29
  */
 public class AsyncResultImpl<T> implements AsyncResult<T> {
 

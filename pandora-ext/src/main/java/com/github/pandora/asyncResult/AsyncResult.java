@@ -7,7 +7,7 @@ import java.util.function.Function;
  * <p>
  * 代表异步结果。使用{@link #result(),#cause()}之前必须调用{@link #succeeded(),#failed()}判断结果状态
  * <p>
- * created by pandora on 2019/11/29
+ * created by wang007 on 2019/11/29
  */
 public interface AsyncResult<T> {
 

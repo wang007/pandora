@@ -24,7 +24,7 @@ import java.util.function.Function;
  *       否则可能发生类型转换异常。
  *
  *
- * created by pandora on 2019/12/1
+ * created by wang007 on 2019/12/1
  */
 public interface Future<T> extends AsyncResult<T>, Asyncable<T> {
 

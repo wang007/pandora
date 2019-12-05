@@ -64,7 +64,7 @@ import java.util.function.Function;
  * 1.{@link #whenComplete(BiConsumer),#whenCompleteAsync(BiConsumer),#whenCompleteAsync(BiConsumer, Executor)}
  * 2. {@link #handle(BiFunction),#handleAsync(BiFunction),#handleAsync(BiFunction, Executor)}
  *
- * created by pandora on 2019/12/2
+ * created by wang007 on 2019/12/2
  */
 public interface CompletableResult<T> extends Future<T>, CompletionStage<T>, Asyncable<T> {
 
